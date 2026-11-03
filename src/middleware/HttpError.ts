@@ -1,1 +1,6 @@
-// HttpError implementation will be added while creating middleware.
+export class HttpError extends Error {
+  constructor(public statusCode: number, message: string) {
+    super(message);
+    this.name = "HttpError";
+  }
+}

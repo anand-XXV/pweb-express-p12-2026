@@ -24,6 +24,15 @@ npm run dev
 
 Jangan commit file `.env`.
 
+## Fitur yang sudah tersedia
+
+- Prisma schema dan seed database.
+- Logger, `HttpError`, error handler, dan middleware 404.
+- Format response sukses.
+- GET `/health`.
+- Pembelian hero: `POST /api/players/:id/heroes`.
+- Statistik: `GET /api/statistics`.
+
 ## Daftar Anggota Kelompok A12
 | Nama | NRP |
 |:--|:-:|

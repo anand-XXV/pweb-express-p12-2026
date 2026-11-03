@@ -5,4 +5,13 @@ node_modules/
 dist/
 coverage/
 prisma/dev.db
+src/generated/prisma/
 *.log
+.postman/
+postman/collections/
+postman/documents/
+postman/environments/
+postman/flows/
+postman/globals/
+postman/mocks/
+postman/specs/
