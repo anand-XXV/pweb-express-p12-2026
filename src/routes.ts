@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { purchaseRouter } from "./modules/purchase/purchase.routes.js";
 import { statisticRouter } from "./modules/statistic/statistic.routes.js";
+import { heroRouter } from "./modules/hero/hero.routes.js";
+import { skinRouter } from "./modules/skin/skin.routes.js";
 import { success } from "./utils/response.js";
 
 export const router = Router();
@@ -11,3 +13,5 @@ router.get("/health", (_req, res) => {
 
 router.use("/api/players/:id/heroes", purchaseRouter);
 router.use("/api/statistics", statisticRouter);
+router.use("/api/heroes", heroRouter);
+router.use("/api/skins", skinRouter);

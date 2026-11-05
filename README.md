@@ -1,16 +1,19 @@
 # pweb-express-p12-2026
 
-## Status awal repository
+## Daftar Anggota Kelompok A12
+| Nama | NRP |
+|:--|:-:|
+| I Made Gyanendra Anand Wisnawa | 5027251072 |
+| Ronnin Raditya Putra Purbono | 5027251119|
+| Mahrinza Redouane Zakariyah | 5027251074 |
 
-Repository ini sudah disiapkan untuk praktikum MLBB Shop. Dataset resmi telah dikonversi ke format JSON, collection Postman tersedia, dan semua dependency awal sudah terpasang.
-
-## Persiapan
+## Setup
 
 1. Isi `DATABASE_URL` dan `DIRECT_URL` pada `.env` dengan connection string Neon.
 2. Lengkapi `prisma/schema.prisma`.
 3. Jalankan:
 
-```powershell
+```
 npm run prisma:generate
 npm run prisma:migrate -- --name init
 npm run seed
@@ -18,24 +21,15 @@ npm run seed
 
 4. Jalankan server saat pengembangan selesai:
 
-```powershell
+```
 npm run dev
 ```
 
-Jangan commit file `.env`.
+Untuk melakukan testing lagi setelah kode di modifikasi, cukup jalankan
 
-## Fitur yang sudah tersedia
+```
+npm run seed
+npm run dev
+```
 
-- Prisma schema dan seed database.
-- Logger, `HttpError`, error handler, dan middleware 404.
-- Format response sukses.
-- GET `/health`.
-- Pembelian hero: `POST /api/players/:id/heroes`.
-- Statistik: `GET /api/statistics`.
-
-## Daftar Anggota Kelompok A12
-| Nama | NRP |
-|:--|:-:|
-| I Made Gyanendra Anand Wisnawa | 5027251072 |
-| Ronnin Raditya Putra Purbono | 5027251119|
-| Mahrinza Redouane Zakariyah | 5027251074 |
+Catatan: Jika npm tidak bisa digunakan, dapat gunakan npm.cmd (hanya berlaku jika menjalankan npm di dalam powershell)
