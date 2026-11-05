@@ -1,15 +1,27 @@
+
 import "dotenv/config";
 import fs from "node:fs";
 import ws from "ws";
 import { neonConfig, Pool } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
-import { Currency, Lane, PrismaClient, Rarity, Role } from "../src/generated/prisma/client.js";
+import {
+  Currency,
+  Lane,
+  PrismaClient,
+  Rarity,
+  Role,
+} from "../src/generated/prisma/client.js";
 
 neonConfig.webSocketConstructor = ws;
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 const prisma = new PrismaClient({
-  adapter: new PrismaNeon({ connectionString: process.env.DATABASE_URL ?? "" }),
+  adapter: new PrismaNeon({
+    connectionString: process.env.DATABASE_URL ?? "",
+  }),
 });
 
 type HeroSeed = {
@@ -29,17 +41,27 @@ type SkinSeed = {
 };
 
 async function main() {
+  // 1. Reset data dan ID otomatis
   await prisma.$executeRawUnsafe(
     'TRUNCATE "PlayerHero", "Player", "Skin", "Hero" RESTART IDENTITY CASCADE',
   );
 
+  // 2. Membaca dataset
   const heroes = JSON.parse(
-    fs.readFileSync(new URL("../data/heroes.json", import.meta.url), "utf8"),
+    fs.readFileSync(
+      new URL("../data/heroes.json", import.meta.url),
+      "utf8",
+    ),
   ) as HeroSeed[];
+
   const skins = JSON.parse(
-    fs.readFileSync(new URL("../data/skins.json", import.meta.url), "utf8"),
+    fs.readFileSync(
+      new URL("../data/skins.json", import.meta.url),
+      "utf8",
+    ),
   ) as SkinSeed[];
 
+  // 3. Memasukkan data Hero
   await prisma.hero.createMany({
     data: heroes.map((hero) => ({
       name: hero.name,
@@ -51,6 +73,7 @@ async function main() {
     })),
   });
 
+  // 4. Memasukkan data Skin
   await prisma.skin.createMany({
     data: skins.map((skin) => ({
       name: skin.name,
@@ -60,24 +83,92 @@ async function main() {
     })),
   });
 
+  // 5. Memasukkan 3 Player awal
   await prisma.player.createMany({
     data: [
-      { id: 1, nickname: "ArekITS", bp: 1500, diamond: 75 },
-      { id: 2, nickname: "SangPushRank", bp: 13000, diamond: 2892 },
-      { id: 3, nickname: "MageSurabaya", bp: 10000, diamond: 0 },
+      {
+        id: 1,
+        nickname: "ArekITS",
+        bp: 1500,
+        diamond: 75,
+      },
+      {
+        id: 2,
+        nickname: "SangPushRank",
+        bp: 13000,
+        diamond: 2892,
+      },
+      {
+        id: 3,
+        nickname: "MageSurabaya",
+        bp: 10000,
+        diamond: 0,
+      },
     ],
   });
 
+  // 6. Memasukkan Hero milik Player
   await prisma.playerHero.createMany({
     data: [
-      { playerId: 1, heroId: 18, currency: Currency.BP, pricePaid: 2000 },
-      { playerId: 1, heroId: 1, currency: Currency.BP, pricePaid: 10800 },
-      { playerId: 2, heroId: 84, currency: Currency.DIAMOND, pricePaid: 599 },
-      { playerId: 2, heroId: 56, currency: Currency.BP, pricePaid: 32000 },
+      {
+        playerId: 1,
+        heroId: 18,
+        currency: Currency.BP,
+        pricePaid: 2000,
+      },
+      {
+        playerId: 1,
+        heroId: 1,
+        currency: Currency.BP,
+        pricePaid: 10800,
+      },
+      {
+        playerId: 2,
+        heroId: 84,
+        currency: Currency.DIAMOND,
+        pricePaid: 599,
+      },
+      {
+        playerId: 2,
+        heroId: 56,
+        currency: Currency.BP,
+        pricePaid: 32000,
+      },
     ],
   });
 
-  console.log(`Seed selesai: ${heroes.length} hero, ${skins.length} skin, 3 player`);
+  // 7. Sinkronisasi sequence ID setelah seed
+  // Hero: ID berikutnya 134
+  await prisma.$queryRaw`
+    SELECT setval(
+      pg_get_serial_sequence('"Hero"', 'id'),
+      COALESCE((SELECT MAX("id") FROM "Hero"), 1),
+      EXISTS(SELECT 1 FROM "Hero")
+    )
+  `;
+
+  // Skin: ID berikutnya 893
+  await prisma.$queryRaw`
+    SELECT setval(
+      pg_get_serial_sequence('"Skin"', 'id'),
+      COALESCE((SELECT MAX("id") FROM "Skin"), 1),
+      EXISTS(SELECT 1 FROM "Skin")
+    )
+  `;
+
+  // Player: ID berikutnya 4
+  await prisma.$queryRaw`
+    SELECT setval(
+      pg_get_serial_sequence('"Player"', 'id'),
+      COALESCE((SELECT MAX("id") FROM "Player"), 1),
+      EXISTS(SELECT 1 FROM "Player")
+    )
+  `;
+
+  // 8. Konfirmasi seed berhasil
+  console.log(
+    `Seed selesai: ${heroes.length} hero, ${skins.length} skin, 3 player`,
+  );
 }
 
 main()
